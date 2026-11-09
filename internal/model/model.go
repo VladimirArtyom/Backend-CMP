@@ -11,7 +11,7 @@ type VoteRequest struct {
 
 type GradingRequest struct {
 	Action       string `json:"action"`
-	IDKelompok   string `json:"id_kelompok"`
+	IDKelompok   string `json:"id_group"`
 	NamaKelompok string `json:"nama_kelompok"`
 	KodeReferral string `json:"nama_penilai"`
 	Kelas        string `json:"kelas"`
@@ -27,20 +27,20 @@ type DbParticipant struct {
 	CreatedAt time.Time
 }
 
-type DbKelompok struct {
-	ID           int
-	Kelas        string
-	NamaKelompok string
-	CreatedAt    time.Time
+type DbGroup struct {
+	ID        int
+	Class     string
+	GroupName string
+	CreatedAt time.Time
 }
 
-type DbKelompokFavorit struct {
+type DbVote struct {
 	ID            int
 	IDParticipant int
-	IDKelompok    int
-	NamaKelompok  string
-	Kelas         string
-	Skor          int
+	IDGroup       int
+	GroupName     string
+	Class         string
+	Score         int
 	CreatedAt     time.Time
 }
 

@@ -63,9 +63,9 @@ func DeleteParticipant(ctx context.Context, email string) error {
 	return nil
 }
 
-func InsertKelompok(ctx context.Context, nama string, kelas string) error {
-	var query string = "INSERT INTO kelompok (nama_kelompok, kelas) VALUES ($1, $2)"
-	_, err := DbPool.Exec(ctx, query, nama, kelas)
+func InsertGroup(ctx context.Context, nama string, class string) error {
+	var query string = "INSERT INTO t_group (group_name, class) VALUES ($1, $2)"
+	_, err := DbPool.Exec(ctx, query, nama, class)
 	if err != nil {
 		return err
 	}
@@ -73,44 +73,59 @@ func InsertKelompok(ctx context.Context, nama string, kelas string) error {
 
 }
 
-func DeleteKelompok(ctx context.Context, id int) error {
+func GetGroup(ctx context.Context, name string) (*model.DbGroup, error) {
+	var group model.DbGroup = model.DbGroup{}
+	var query string = "SELECT * FROM t_group WHERE group_name=$1"
+	err := DbPool.QueryRow(ctx, query, name).Scan(&group.ID,
+		&group.GroupName, &group.Class, &group.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
 
-	var query string = "DELETE FROM KELOMPOK WHERE id=$1"
-	_, err := DbPool.Exec(ctx, query, id)
+	return &group, nil
+
+}
+
+func GetGroups(ctx context.Context) ([]model.DbGroup, error) {
+	var groups []model.DbGroup = []model.DbGroup{}
+	var query = "SELECT * FROM t_group"
+	rows, err := DbPool.Query(ctx, query)
+	if err != nil {
+
+		return nil, err
+	}
+
+	for rows.Next() {
+		var group model.DbGroup = model.DbGroup{}
+		err = rows.Scan(&group.ID, &group.GroupName,
+			&group.Class, &group.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		groups = append(groups, group)
+	}
+
+	return groups, nil
+}
+
+func DeleteGroup(ctx context.Context, groupName string) error {
+
+	var query string = "DELETE FROM t_group WHERE group_name=$1"
+	_, err := DbPool.Exec(ctx, query, groupName)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteAllKelompk(ctx context.Context) error {
-	var query string = "DELETE FROM kelompok"
+func DeleteAllGroup(ctx context.Context) error {
+	var query string = "DELETE FROM t_group"
 	_, err := DbPool.Exec(ctx, query)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func InsertKelompokFavorit(ctx context.Context) error {
-	var query string = "INSERT INTO kelompok_favorit() VALUES ()"
-	_, err := DbPool.Exec(ctx, query)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetKelompokFavorit(ctx context.Context, id int) error {
-	var kel *model.DbKelompokFavorit = &model.DbKelompokFavorit{}
-	var query string = "SELECT id, id_participant, id_kelompok, kelas, nama_kelompok, skor, created_at FROM kelompok_favorit"
-	err := DbPool.QueryRow(ctx, query, id).Scan(&kel.ID, &kel.IDParticipant, &kel.IDKelompok, &kel.Kelas, &kel.NamaKelompok, &kel.Skor, &kel.CreatedAt)
-
-	if err != nil {
-		return err
-	}
-	return nil
-
 }
 
 func GetGrade(ctx context.Context, id int) error {
@@ -177,6 +192,66 @@ func InsertGrade(ctx context.Context, kode_referral, id_kelompok, nama_penilai s
 // delete a list of referell --
 
 // insert group favorite
-func Insert_Vote_to_A_Group() {
+func InsertVote(ctx context.Context, id_participant, id_group int, class string, group_name string, score int) error {
+	var query = `INSERT INTO 
+	votes (id_participant, id_group, class, group_name, score) 
+	VALUES ($1, $2, $3, $4, $5)`
 
+	_, err := DbPool.Exec(ctx, query, id_participant, id_group, class, group_name, score)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func DeleteVote(ctx context.Context, id_participant, id_group int) error {
+	var query = "DELETE FROM votes WHERE id_participant=$1 AND id_group=$2"
+	_, err := DbPool.Exec(ctx, query, id_participant, id_group)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func GetVoteById(ctx context.Context, id_participant, id_group int) (*model.DbVote, error) {
+	var vote model.DbVote = model.DbVote{}
+	var query = "SELECT * FROM votes WHERE id_participant=$1 AND id_group=$2"
+	err := DbPool.QueryRow(ctx, query, id_participant, id_group).Scan(&vote.ID,
+		&vote.IDParticipant, &vote.IDGroup,
+		&vote.GroupName, &vote.Score, &vote.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vote, nil
+
+}
+
+func GetVotes(ctx context.Context) ([]model.DbVote, error) {
+
+	var query = "SELECT * FROM votes"
+	var votes []model.DbVote = []model.DbVote{}
+
+	rows, err := DbPool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var vote model.DbVote = model.DbVote{}
+		err = rows.Scan(&vote.ID, &vote.IDParticipant, &vote.IDGroup,
+			&vote.Class, &vote.GroupName, &vote.Score, &vote.CreatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		votes = append(votes, vote)
+	}
+
+	return votes, nil
 }

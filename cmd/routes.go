@@ -9,6 +9,7 @@ import (
 )
 
 func routes() http.Handler {
+
 	mux := chi.NewRouter()
 
 	mux.Use(cors.Handler(
@@ -23,6 +24,16 @@ func routes() http.Handler {
 	mux.Post("/participant", internal.InsertParticipant)
 	mux.Get("/participant", internal.GetParticipant)
 	mux.Delete("/participant", internal.GetParticipant)
+
+	mux.Get("/group", internal.GetGroup)
+	mux.Post("/group", internal.InsertGroup)
+	mux.Delete("/group", internal.DeleteGroup)
+	mux.Get("/groups", internal.GetGroups)
+
+	mux.Post("/vote", internal.InsertVote)
+	mux.Delete("/vote", internal.DeleteVote)
+	mux.Get("/vote", internal.GetVote)
+	mux.Get("/votes", internal.GetVotes)
 
 	return mux
 }
